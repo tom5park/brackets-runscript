@@ -4,14 +4,8 @@ maxerr: 50, node: true */
 (function () {
     "use strict";
 	var spawn 	= require('child_process').spawn;
-    function runGroovyCode(code){
-		var output = [];
-		/*
-		return 1+1;
-		5a0.times { println it + '박헌규' }
-		*/
-		
-		var groovy 	= spawn('/usr/local/opt/groovy/bin/groovy', ['-e', code], {});
+    function runGroovyCode(code, config){
+		var groovy 	= spawn(config.cmd, ['-e', code], {});
 		groovy.stdin.setEncoding('utf8');
 		groovy.stdout.setEncoding('utf8');
 		groovy.stdout.on('data', function(data){

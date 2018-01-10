@@ -1,0 +1,14 @@
+{
+	"groovy": {
+		"cmd":"/usr/local/opt/groovy/bin/groovy"
+		, "key":"Cmd-Shift-F9"
+	}
+	
+	, "python": {
+		"key":"Cmd-Shift-Opt-Ctrl-F10"
+	}
+	
+	, "js": {
+		"key":"Cmd-Shift-F10"
+	}
+}

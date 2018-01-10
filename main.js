@@ -7,13 +7,18 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var CommandManager = brackets.getModule("command/CommandManager"),
-        Menus          = brackets.getModule("command/Menus"),
-        DocumentManager = brackets.getModule("document/DocumentManager"),
-        EditorManager = brackets.getModule("editor/EditorManager"),
-        ExtensionUtils = brackets.getModule("utils/ExtensionUtils"),
-        NodeDomain = brackets.getModule("utils/NodeDomain"),
+    var CommandManager	= brackets.getModule("command/CommandManager"),
+        Menus			= brackets.getModule("command/Menus"),
+        DocumentManager	= brackets.getModule("document/DocumentManager"),
+		FileUtils		= brackets.getModule("file/FileUtils"),
+        EditorManager	= brackets.getModule("editor/EditorManager"),
+        ExtensionUtils	= brackets.getModule("utils/ExtensionUtils"),
+        NodeDomain		= brackets.getModule("utils/NodeDomain"),
+		Dialogs			= brackets.getModule("widgets/Dialogs"),
         KeyBindingManager = brackets.getModule("command/KeyBindingManager");
+
+	
+	var config = JSON.parse(require('text!config.json'));
 
     var RUN_SCRIPT_NAME   = "Run Script as JS",
         RUN_SCRIPT_COMMAND_ID  = "runscript.runjs",
@@ -144,7 +149,7 @@ define(function (require, exports, module) {
         if (selectedText === '') {
             selectedText = DocumentManager.getCurrentDocument().getText();
         }
-        groovyDomain.exec('runGroovyCode', selectedText);
+        groovyDomain.exec('runGroovyCode', selectedText, config.groovy);
     }
 
     function quickRun(){
@@ -183,6 +188,15 @@ define(function (require, exports, module) {
     CommandManager.register(RUN_SCRIPT_PERL_NAME, RUN_SCRIPT_PERL_COMMAND_ID, runperl);
 	CommandManager.register(RUN_SCRIPT_GROOVY_NAME, RUN_SCRIPT_GROOVY_COMMAND_ID, rungroovy);
     CommandManager.register(RUN_SCRIPT_QUICKRUN_NAME, RUN_SCRIPT_QUICKRUN_COMMAND_ID, quickRun);
+	CommandManager.register("Edit Config", 'runscript.open-conf', function () {
+		Dialogs.showModalDialog('', 'Notice', 'You must restart Brackets after changing this file.');
+		var src = FileUtils.getNativeModuleDirectoryPath(module) + "/config.json";
+		DocumentManager.getDocumentForPath(src).done(
+			function (doc) {
+				DocumentManager.setCurrentDocument(doc);
+			}
+		);
+	});
 
     Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuDivider();
     Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(RUN_SCRIPT_COMMAND_ID);
@@ -191,8 +205,16 @@ define(function (require, exports, module) {
     Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(RUN_SCRIPT_RUBY_COMMAND_ID);
     Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(RUN_SCRIPT_LUA_COMMAND_ID);
     Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(RUN_SCRIPT_PERL_COMMAND_ID);
-	Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(RUN_SCRIPT_GROOVY_COMMAND_ID);
+	Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(RUN_SCRIPT_GROOVY_COMMAND_ID);    
 
-    KeyBindingManager.addBinding(RUN_SCRIPT_QUICKRUN_COMMAND_ID, 'F12');
-
+	var menu = Menus.addMenu("RunScript", 'extensions.runscript.menu', Menus.AFTER, Menus.AppMenuBar.NAVIGATE_MENU); // print(333);1+1
+	menu.addMenuItem(RUN_SCRIPT_COMMAND_ID, config.js && config.js.key);
+	menu.addMenuItem(RUN_SCRIPT_PYTHON_COMMAND_ID, config.python && config.python.key);
+	menu.addMenuItem(RUN_SCRIPT_PHP_COMMAND_ID, config.php && config.php.key);
+	menu.addMenuItem(RUN_SCRIPT_RUBY_COMMAND_ID, config.ruby && config.ruby.key);
+	menu.addMenuItem(RUN_SCRIPT_LUA_COMMAND_ID, config.lua && config.lua.key);
+	menu.addMenuItem(RUN_SCRIPT_PERL_COMMAND_ID, config.perl && config.perl.key);
+	menu.addMenuItem(RUN_SCRIPT_GROOVY_COMMAND_ID, config.groovy && config.groovy.key, null, null);
+	menu.addMenuDivider();
+    menu.addMenuItem('runscript.open-conf');
 });
