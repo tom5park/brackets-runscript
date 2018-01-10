@@ -27,6 +27,8 @@ define(function (require, exports, module) {
         RUN_SCRIPT_LUA_COMMAND_ID  = "runscript.runLua",
         RUN_SCRIPT_PERL_NAME  = "Run Script as Perl",
         RUN_SCRIPT_PERL_COMMAND_ID  = "runscript.runPerl",
+		RUN_SCRIPT_GROOVY_NAME  = "Run Script as Groovy",
+        RUN_SCRIPT_GROOVY_COMMAND_ID  = "runscript.runGroovy",
         RUN_SCRIPT_QUICKRUN_NAME  = "Quick Run",
         RUN_SCRIPT_QUICKRUN_COMMAND_ID  = "runscript.quickrun";
 
@@ -133,6 +135,17 @@ define(function (require, exports, module) {
         });
 
     }
+	
+	function rungroovy() {
+        var groovyDomain = new NodeDomain("groovy", ExtensionUtils.getModulePath(module, "node/groovyModule"));
+		var path = ExtensionUtils.getModulePath(module, "node/TerminalDomain");
+        var editor = EditorManager.getCurrentFullEditor();
+        var selectedText = editor.getSelectedText();
+        if (selectedText === '') {
+            selectedText = DocumentManager.getCurrentDocument().getText();
+        }
+        groovyDomain.exec('runGroovyCode', selectedText);
+    }
 
     function quickRun(){
         var currentDoc = DocumentManager.getCurrentDocument(),
@@ -156,6 +169,9 @@ define(function (require, exports, module) {
             case 'Perl':
                 runperl();
                 break;
+			case 'Groovy':
+                rungroovy();
+                break;	
         }
     }
 
@@ -165,6 +181,7 @@ define(function (require, exports, module) {
     CommandManager.register(RUN_SCRIPT_RUBY_NAME, RUN_SCRIPT_RUBY_COMMAND_ID, runruby);
     CommandManager.register(RUN_SCRIPT_LUA_NAME, RUN_SCRIPT_LUA_COMMAND_ID, runlua);
     CommandManager.register(RUN_SCRIPT_PERL_NAME, RUN_SCRIPT_PERL_COMMAND_ID, runperl);
+	CommandManager.register(RUN_SCRIPT_GROOVY_NAME, RUN_SCRIPT_GROOVY_COMMAND_ID, rungroovy);
     CommandManager.register(RUN_SCRIPT_QUICKRUN_NAME, RUN_SCRIPT_QUICKRUN_COMMAND_ID, quickRun);
 
     Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuDivider();
@@ -174,7 +191,8 @@ define(function (require, exports, module) {
     Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(RUN_SCRIPT_RUBY_COMMAND_ID);
     Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(RUN_SCRIPT_LUA_COMMAND_ID);
     Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(RUN_SCRIPT_PERL_COMMAND_ID);
+	Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(RUN_SCRIPT_GROOVY_COMMAND_ID);
 
-    KeyBindingManager.addBinding(RUN_SCRIPT_QUICKRUN_COMMAND_ID, 'F9');
+    KeyBindingManager.addBinding(RUN_SCRIPT_QUICKRUN_COMMAND_ID, 'F12');
 
 });
